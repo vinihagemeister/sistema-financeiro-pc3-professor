@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, ActivationEnd, Router } from '@angular/router';
+import { filter, map, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -8,11 +9,26 @@ import { Router } from '@angular/router';
 })
 export class AppComponent {
 
+  title: string = "Página Principal";
+
   constructor(
     private router: Router,
+    private activatedRoute: ActivatedRoute,
   ) { }
 
   ngOnInit(){
+    this.router.events.pipe(
+      map(() => {
+        let route = this.activatedRoute;
+        while (route.firstChild) {
+          route = route.firstChild;
+        }
+        return route;
+      }),
+      switchMap((route) => route.data)
+    ).subscribe((e) => {
+      this.title = e['title'];
+    });
   }
 
   navegarPara(rota: any[]){

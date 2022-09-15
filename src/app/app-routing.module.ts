@@ -7,15 +7,18 @@ import { Pagina2Component } from './components/pagina2/pagina2.component';
 const routes: Routes = [
   {
     path: '',
-    component: PaginaPrincipalComponent
+    component: PaginaPrincipalComponent,
+    data: { title: 'Página Principal' }
   },
   {
     path: 'pagina1',
-    component: Pagina1Component
+    component: Pagina1Component,
+    data: { title: 'Pagina 1' }
   },
   {
     path: 'pagina2',
-    component: Pagina2Component
+    component: Pagina2Component,
+    data: { title: 'Página 2' }
   }
 
 

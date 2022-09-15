@@ -41,7 +41,7 @@
 <mat-sidenav-container class="example-container" [hasBackdrop]="true">
   <mat-sidenav #sidenav mode="side" [opened]="false" class="example-sidenav"
                [fixedInViewport]="true" mode="over">
-    <h1>Sistema Financeiro</h1>
+    <h1 class="text-white">Sistema Financeiro</h1>
 
     <div class="d-block btn btn-warning m-1" (click)="sidenav.toggle()" (click)="navegarPara([''])">
       Pagina Principal
@@ -54,16 +54,16 @@
     </div>
   </mat-sidenav>
 
-  <mat-sidenav-content style="height: 100%; min-height: 100vh;">
+  <mat-sidenav-content>
 
 
 
 
-    <mat-toolbar>
+    <mat-toolbar color="primary">
       <button mat-icon-button (click)="sidenav.toggle()" class="example-icon" aria-label="Example icon-button with menu icon">
         <mat-icon>menu</mat-icon>
       </button>
-      <span>Sistema Financeiro</span>
+      <span class="mx-2">Sistema Financeiro / {{title}}</span>
       <span class="example-spacer"></span>
       <button mat-icon-button class="example-icon favorite-icon" aria-label="Example icon-button with heart icon">
         <mat-icon>favorite</mat-icon>

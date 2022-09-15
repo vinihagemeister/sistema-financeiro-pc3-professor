@@ -16,6 +16,9 @@ import { MaterialExampleModule } from 'src/material.module';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDrawerContainer } from '@angular/material/sidenav';
 import { HttpClientModule } from '@angular/common/http';
+import { DialogInserirTransacaoComponent } from './components/dialog-inserir-transacao/dialog-inserir-transacao.component';
+import { DialogDeletarTransacaoComponent } from './components/dialog-deletar-transacao/dialog-deletar-transacao.component';
+import { CoreModule } from './core/core.module';
 
 @NgModule({
   declarations: [
@@ -23,6 +26,8 @@ import { HttpClientModule } from '@angular/common/http';
     PaginaPrincipalComponent,
     Pagina1Component,
     Pagina2Component,
+    DialogInserirTransacaoComponent,
+    DialogDeletarTransacaoComponent,
   ],
   imports: [
     BrowserModule,
@@ -39,6 +44,8 @@ import { HttpClientModule } from '@angular/common/http';
     HttpClientModule,
 
     MaterialExampleModule,
+
+    CoreModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

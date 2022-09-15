@@ -1,9 +1,13 @@
-import { Transacao } from './../../models/transacao/transacao.model';
-import { Component, OnInit } from '@angular/core';
+import { DialogDeletarTransacaoComponent } from './../dialog-deletar-transacao/dialog-deletar-transacao.component';
+import { DialogInserirTransacaoComponent } from './../dialog-inserir-transacao/dialog-inserir-transacao.component';
+import { Transacao } from './../../dominio/transacao/transacao.model';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
-import { map } from 'rxjs';
-import { TransacaoService } from 'src/app/models/transacao/transacao.service';
+import { TransacaoService } from 'src/app/dominio/transacao/transacao.service';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSort } from '@angular/material/sort';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 
 export interface PeriodicElement {
   name: string;
@@ -40,55 +44,146 @@ const ELEMENT_DATA: PeriodicElement[] = [
   templateUrl: './pagina-principal.component.html',
   styleUrls: ['./pagina-principal.component.scss']
 })
-export class PaginaPrincipalComponent implements OnInit {
+export class PaginaPrincipalComponent implements OnInit, AfterViewInit {
 
-  displayedColumns: string[] = ['id', 'createdAt', 'tipo', 'valor', 'saldo'];
+  displayedColumns: string[] = ['id', 'descricao', 'createdAt', 'tipo', 'valor', 'saldo', 'acoes'];
   // dataSource = new MatTableDataSource(ELEMENT_DATA);
-  dataSource = new MatTableDataSource([] as Transacao[]);
+  transacoes: any = [];
+  dataSource: MatTableDataSource<Transacao> = new MatTableDataSource(this.transacoes);
+  // transacoesDados: any = [];
+
+  totalRows = 0;
+  pageSize = 10;
+  currentPage = 0;
+  pageSizeOptions: number[] = [5, 10, 25, 100];
+  isLoading = false;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
   constructor(
     private router: Router,
-    private transacaoService: TransacaoService
-    ) { }
+    private transacaoService: TransacaoService,
+    public dialog: MatDialog
+    ) {
+     }
 
 
   ngOnInit() {
+   this.buscaListaDeTransacoes();
+  }
 
-    // this.transacaoService.selectAll().subscribe(
-    //   (transacoes)=>{}
-    // )
-    let that = this;
-
-    this.transacaoService.selectAll()
-    // .pipe(map((x) => x.concat({})))
-    .subscribe(
-      {
-
-        next(transacoes) {
-          console.log(transacoes);
-          that.dataSource = new MatTableDataSource(transacoes);
-        },
-        error(err) { console.error(err) },
-        complete() {
-          console.log('done');
-
-        }
-      }
-    )
-
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator as MatPaginator;
+    this.dataSource.sort = this.sort as MatSort;
   }
 
   navegarPara(rota: any[]){
     this.router.navigate(rota);
   }
 
+  // applyFilter(event: Event) {
+  //   const filterValue = (event.target as HTMLInputElement).value;
+  //   this.transacoes.filter = filterValue.trim().toLowerCase();
+  // }
+
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+    // this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    let that = this;
+
+    this.transacaoService.selectAllByDescricao(this.currentPage, this.pageSize, filterValue).subscribe(
+      {
+        next(resposta){
+            // that.dataSource.paginator.firstPage();
+            that.paginator.pageIndex = that.currentPage;
+            that.paginator.length = resposta.count;
+            that.dataSource = new MatTableDataSource(resposta.items);
+        },
+        error(err){
+          console.error(err);
+        },
+        complete(){
+          console.log("requisição completa");
+        }
+      }
+    )
+
+
   }
 
   getDateBr(isoDate: string){
     return new Date(isoDate).toLocaleDateString('pt-br')
   }
+
+  openDialogInserirEditarTransacao(transacao?: Transacao){
+    const dialogRef = this.dialog.open(DialogInserirTransacaoComponent, {
+      width: '1000px',
+      data: { transacao },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if(result) this.buscaListaDeTransacoes();
+    });
+  }
+
+
+
+  deletar(obj: Transacao){
+    this.openDialogDeletarTransacao(obj);
+  }
+
+  openDialogDeletarTransacao(transacao: Transacao){
+    const dialogRef = this.dialog.open(DialogDeletarTransacaoComponent, {
+      width: '500px',
+      data: { transacao },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if(result) this.buscaListaDeTransacoes();
+    });
+  }
+
+  buscaListaDeTransacoes() {
+    this.isLoading = true;
+
+    let that = this;
+
+    this.transacaoService.selectAll(this.currentPage, this.pageSize).subscribe(
+      {
+        next(resposta){
+          // that.transacoes = resposta.items;
+          that.paginator.pageIndex = that.currentPage;
+          that.paginator.length = resposta.count;
+
+          that.populaDataSource(resposta.items);
+
+
+
+        },
+        error(err){
+          console.error(err);
+        },
+        complete(){
+          console.log("requisição completa");
+          that.isLoading = false;
+        }
+      }
+    );
+  }
+
+  populaDataSource(transacoes: Transacao[]){
+    this.dataSource = new MatTableDataSource(transacoes);
+    this.ngAfterViewInit();
+  }
+
+  pageChanged(event: PageEvent) {
+    // console.log({ event });
+    this.pageSize = event.pageSize;
+    this.currentPage = event.pageIndex;
+    this.buscaListaDeTransacoes();
+  }
+
 
 }
