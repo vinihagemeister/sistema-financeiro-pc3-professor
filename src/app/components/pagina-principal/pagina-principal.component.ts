@@ -175,7 +175,7 @@ export class PaginaPrincipalComponent implements OnInit, AfterViewInit {
 
   populaDataSource(transacoes: Transacao[]){
     this.dataSource = new MatTableDataSource(transacoes);
-    this.ngAfterViewInit();
+    // this.ngAfterViewInit();
   }
 
   pageChanged(event: PageEvent) {

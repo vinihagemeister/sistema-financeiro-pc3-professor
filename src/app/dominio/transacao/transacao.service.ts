@@ -22,7 +22,7 @@ export class TransacaoService {
 
 
 
-  selectAll(pagina: number = 0, limiteDeLinhas?: number, ordenacaoPelaColuna: string = '', ordenacaoAscOuDesc: string = ''){
+  selectAll(pagina: number = 1, limiteDeLinhas: number = 5, ordenacaoPelaColuna: string = '', ordenacaoAscOuDesc: string = ''){
     return this.httpClient.get<{items: Transacao[], count: number}>
     (
       RECURSO+`?page=${pagina+1}&limit=${limiteDeLinhas}&sortBy=${ordenacaoPelaColuna}&order=${ordenacaoAscOuDesc}`,
