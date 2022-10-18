@@ -1,8 +1,10 @@
+import { tap } from 'rxjs/operators';
 import { InterceptorSkipHeader } from './../../core/auth/request.interceptor';
 import { Transacao } from './transacao.model';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
+import { of, map } from 'rxjs';
 
 
 
@@ -20,9 +22,15 @@ export class TransacaoService {
     private httpClient: HttpClient
   ) { }
 
+  selectAll(pagina: number = 0, limiteDeLinhas: number = 5, ordenacaoPelaColuna: string = '', ordenacaoAscOuDesc: string = ''){
+    return this.httpClient.get<{content: Transacao[], totalElements: number, pageable: any, sort: any}>
+    (
+      RECURSO+`/selectAllComPaginacao?page=${pagina}&size=${limiteDeLinhas}`,
+      {headers}
+    );
+  }
 
-
-  selectAll(pagina: number = 1, limiteDeLinhas: number = 5, ordenacaoPelaColuna: string = '', ordenacaoAscOuDesc: string = ''){
+  selectAllComPaginacao(pagina: number = 0, limiteDeLinhas: number = 5, ordenacaoPelaColuna: string = '', ordenacaoAscOuDesc: string = ''){
     return this.httpClient.get<{items: Transacao[], count: number}>
     (
       RECURSO+`?page=${pagina+1}&limit=${limiteDeLinhas}&sortBy=${ordenacaoPelaColuna}&order=${ordenacaoAscOuDesc}`,
@@ -62,4 +70,15 @@ export class TransacaoService {
     return this.httpClient.delete<Transacao>(RECURSO+'/'+id);
   }
 
+  selectLast(){
+    return this.httpClient.get<{items: Transacao[], count: number}>
+    (RECURSO).pipe(
+      map(
+        resposta=>{
+          return resposta&&resposta.items&&resposta.items.length>0 ? resposta.items[resposta.items.length-1] : null
+        }
+      )
+    )
   }
+
+}

@@ -3,6 +3,7 @@ import { TransacaoService } from 'src/app/dominio/transacao/transacao.service';
 import { ETipoTransacao } from './../../dominio/transacao/etipotransacao/etipotransacao.model';
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { of, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-dialog-inserir-transacao',
@@ -30,10 +31,8 @@ export class DialogInserirTransacaoComponent implements OnInit {
   ngOnInit(): void {
 
     if(this.data && this.data.transacao){
-      console.log(this.data.transacao);
       this.modelToForm(this.data.transacao);
     }
-
 
   }
 
@@ -42,11 +41,34 @@ export class DialogInserirTransacaoComponent implements OnInit {
   }
 
   salvar(): void {
-    let transacaoObj = this.formToModel();
+    let transacaoParaSalvar = this.formToModel();
 
     let that = this;
 
-    this.transacaoService.insertOrUpdate(transacaoObj).subscribe(
+    this.transacaoService.selectLast().subscribe(
+      ultimaTransacao=>{
+
+        if(ultimaTransacao&&ultimaTransacao.saldo){
+          if(transacaoParaSalvar.tipo == "ENTRADA"){
+            transacaoParaSalvar.saldo = Number(ultimaTransacao.saldo)+transacaoParaSalvar.valor;
+            this.salvarTransacao(transacaoParaSalvar);
+          }
+          else if(transacaoParaSalvar.tipo == "SAIDA"){
+            transacaoParaSalvar.saldo = Number(ultimaTransacao.saldo)-transacaoParaSalvar.valor;
+            this.salvarTransacao(transacaoParaSalvar);
+          }
+        }
+
+      }
+    )
+
+
+  }
+
+  salvarTransacao(transacaoParaSalvar: Transacao){
+    let that = this;
+
+    this.transacaoService.insertOrUpdate(transacaoParaSalvar).subscribe(
       {
         next(transacao){
           that.dialogRef.close(transacao);

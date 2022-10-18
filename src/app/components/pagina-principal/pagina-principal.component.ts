@@ -73,6 +73,8 @@ export class PaginaPrincipalComponent implements OnInit, AfterViewInit {
    this.buscaListaDeTransacoes();
   }
 
+
+
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator as MatPaginator;
     this.dataSource.sort = this.sort as MatSort;
@@ -105,7 +107,7 @@ export class PaginaPrincipalComponent implements OnInit, AfterViewInit {
           console.error(err);
         },
         complete(){
-          console.log("requisição completa");
+          // console.log("requisição completa");
         }
       }
     )
@@ -118,9 +120,11 @@ export class PaginaPrincipalComponent implements OnInit, AfterViewInit {
   }
 
   openDialogInserirEditarTransacao(transacao?: Transacao){
+
+
     const dialogRef = this.dialog.open(DialogInserirTransacaoComponent, {
       width: '1000px',
-      data: { transacao },
+      data: { transacao, ultimaTransacao: this.dataSource.data[this.dataSource.data.length-1] },
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -155,9 +159,9 @@ export class PaginaPrincipalComponent implements OnInit, AfterViewInit {
         next(resposta){
           // that.transacoes = resposta.items;
           that.paginator.pageIndex = that.currentPage;
-          that.paginator.length = resposta.count;
+          that.paginator.length = resposta.totalElements;
 
-          that.populaDataSource(resposta.items);
+          that.populaDataSource(resposta.content);
 
 
 
@@ -166,7 +170,6 @@ export class PaginaPrincipalComponent implements OnInit, AfterViewInit {
           console.error(err);
         },
         complete(){
-          console.log("requisição completa");
           that.isLoading = false;
         }
       }
@@ -179,7 +182,6 @@ export class PaginaPrincipalComponent implements OnInit, AfterViewInit {
   }
 
   pageChanged(event: PageEvent) {
-    // console.log({ event });
     this.pageSize = event.pageSize;
     this.currentPage = event.pageIndex;
     this.buscaListaDeTransacoes();
